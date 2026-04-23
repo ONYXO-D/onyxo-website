@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onyxo Devs — Digital Agency</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ===== CUSTOM CURSOR ===== */
+  *, *::before, *::after { cursor: none !important; }
+  #cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--blue);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.3s, height 0.3s, background 0.3s;
+    mix-blend-mode: screen;
+  }
+  #cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1.5px solid rgba(74,108,247,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.12s ease, width 0.3s, height 0.3s, border-color 0.3s;
+  }
+  body:has(a:hover) #cursor, body:has(button:hover) #cursor { width: 20px; height: 20px; background: #a78bfa; }
+  body:has(a:hover) #cursor-ring, body:has(button:hover) #cursor-ring { width: 52px; height: 52px; border-color: rgba(167,139,250,0.6); }
+
+  /* ===== FLOATING ORBS ===== */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: orbFloat linear infinite;
+  }
+  .orb-1 { width: 500px; height: 500px; background: rgba(74,108,247,0.12); top: -100px; left: -100px; animation-duration: 20s; }
+  .orb-2 { width: 350px; height: 350px; background: rgba(167,139,250,0.1); bottom: 0; right: -50px; animation-duration: 25s; animation-delay: -8s; }
+  .orb-3 { width: 250px; height: 250px; background: rgba(74,108,247,0.08); top: 40%; left: 60%; animation-duration: 18s; animation-delay: -5s; }
+
+  @keyframes orbFloat {
+    0%   { transform: translate(0, 0) scale(1); }
+    25%  { transform: translate(30px, -40px) scale(1.05); }
+    50%  { transform: translate(-20px, -70px) scale(0.95); }
+    75%  { transform: translate(40px, -30px) scale(1.03); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+
+  /* ===== PARTICLE CANVAS ===== */
+  #particleCanvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ===== TYPING CURSOR ===== */
+  .typing-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 0.85em;
+    background: var(--blue-light);
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: blink 0.8s step-end infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* ===== SHIMMER BUTTON ===== */
+  .btn-primary {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 2.5s infinite;
+  }
+  @keyframes shimmer { to { left: 160%; } }
+
+  /* ===== STAGGER DELAYS ===== */
+  .stagger-1 { transition-delay: 0.05s !important; }
+  .stagger-2 { transition-delay: 0.15s !important; }
+  .stagger-3 { transition-delay: 0.25s !important; }
+  .stagger-4 { transition-delay: 0.35s !important; }
+  .stagger-5 { transition-delay: 0.45s !important; }
+  .stagger-6 { transition-delay: 0.55s !important; }
+
+  /* ===== STATS BAR ===== */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+    padding: 40px 6%;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-item { text-align: center; }
+  .stat-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--white);
+    display: block;
+  }
+  .stat-number span { color: var(--blue); }
+  .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+  /* ===== HERO GRID ANIMATION ===== */
+  .hero-grid { animation: gridPan 30s linear infinite; }
+  @keyframes gridPan {
+    from { background-position: 0 0; }
+    to   { background-position: 60px 60px; }
+  }
+
+  /* ===== GLOW RING on Pro card ===== */
+  .pricing-card.popular::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--blue), #a78bfa, var(--blue));
+    z-index: -1;
+    background-size: 200% 200%;
+    animation: gradientSpin 4s linear infinite;
+    opacity: 0.6;
+  }
+  @keyframes gradientSpin {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ===== SERVICE ICON FLOAT ===== */
+  .service-card:hover .service-icon { animation: iconBounce 0.5s ease; }
+  @keyframes iconBounce {
+    0%   { transform: translateY(0); }
+    40%  { transform: translateY(-8px); }
+    70%  { transform: translateY(-4px); }
+    100% { transform: translateY(0); }
+  }
+
+  /* ===== PAGE LOAD WIPE ===== */
+  #page-loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    animation: loaderFade 0.4s 1.4s ease forwards;
+  }
+  @keyframes loaderFade { to { opacity: 0; pointer-events: none; } }
+  .loader-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: 2px;
+    animation: loaderPulse 1s ease infinite alternate;
+  }
+  @keyframes loaderPulse { from { opacity: 0.4; } to { opacity: 1; } }
+  .loader-bar {
+    width: 160px; height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .loader-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--blue), #a78bfa);
+    border-radius: 2px;
+    animation: loaderFill 1.2s ease forwards;
+  }
+  @keyframes loaderFill { to { width: 100%; } }
+
+  /* ===== MAGNETIC BUTTON ===== */
+  .btn-primary, .btn-secondary { will-change: transform; }
+
+  /* ===== SCROLL PROGRESS BAR ===== */
+  #scroll-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue), #a78bfa);
+    z-index: 10000;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ===== TILT CARD ===== */
+  .service-card, .pricing-card { will-change: transform; }
+</style>
+<style>
+  :root {
+    --bg: #060810;
+    --surface: #0d1120;
+    --card: #111827;
+    --blue: #4A6CF7;
+    --blue-light: #6d8ffb;
+    --blue-dim: rgba(74,108,247,0.15);
+    --white: #f0f4ff;
+    --muted: #8a94b0;
+    --border: rgba(74,108,247,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ===== NAVBAR ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 18px 6%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(6,8,16,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .nav-logo img {
+    height: 36px;
+    width: 36px;
+    object-fit: contain;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--white);
+    letter-spacing: 0.5px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+
+  .btn-nav-login {
+    background: var(--blue-dim);
+    border: 1px solid var(--border);
+    color: var(--blue-light);
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-nav-login:hover {
+    background: var(--blue);
+    color: white;
+    border-color: var(--blue);
+  }
+
+  /* HAMBURGER */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--white);
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 6% 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(74,108,247,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(74,108,247,0.08) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,108,247,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,108,247,0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  .hero-content { position: relative; z-index: 2; max-width: 800px; }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--blue-dim);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    color: var(--blue-light);
+    font-weight: 500;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-badge-dot {
+    width: 6px; height: 6px;
+    background: var(--blue);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.6rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--blue-light), #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 540px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--blue);
+    color: white;
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 30px rgba(74,108,247,0.3);
+  }
+
+  .btn-primary:hover {
+    background: var(--blue-light);
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(74,108,247,0.5);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--white);
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--blue-dim);
+    border-color: var(--blue);
+    transform: translateY(-2px);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== SECTIONS ===== */
+  section { padding: 90px 6%; }
+
+  .section-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .section-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  .section-header { margin-bottom: 56px; }
+
+  /* ===== SERVICES ===== */
+  #services { background: var(--surface); }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .service-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .service-card:hover { transform: translateY(-6px); border-color: var(--blue); }
+  .service-card:hover::before { opacity: 1; }
+
+  .service-icon {
+    width: 48px; height: 48px;
+    background: var(--blue-dim);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 18px;
+  }
+
+  .service-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .service-card p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+
+  /* ===== PRICING ===== */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 24px;
+    align-items: start;
+  }
+
+  .pricing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 30px;
+    position: relative;
+    transition: transform 0.3s;
+  }
+
+  .pricing-card:hover { transform: translateY(-6px); }
+
+  .pricing-card.popular {
+    border-color: var(--blue);
+    box-shadow: 0 0 40px rgba(74,108,247,0.2), inset 0 0 40px rgba(74,108,247,0.03);
+  }
+
+  .popular-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--blue);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 5px 18px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .plan-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--blue-light);
+    margin-bottom: 12px;
+  }
+
+  .plan-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .plan-price span { font-size: 1.2rem; vertical-align: top; margin-top: 8px; display: inline-block; }
+
+  .plan-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
+
+  .plan-features { list-style: none; margin-bottom: 32px; }
+
+  .plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.88rem;
+    color: #c8d0e8;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .plan-features li:last-child { border-bottom: none; }
+
+  .check {
+    color: var(--blue);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .btn-plan {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-plan-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--white);
+  }
+
+  .btn-plan-outline:hover { background: var(--blue-dim); border-color: var(--blue); }
+
+  .btn-plan-filled {
+    background: var(--blue);
+    color: white;
+    box-shadow: 0 0 20px rgba(74,108,247,0.3);
+  }
+
+  .btn-plan-filled:hover { background: var(--blue-light); box-shadow: 0 0 30px rgba(74,108,247,0.5); }
+
+  /* ===== AUTH SECTION ===== */
+  #auth { background: var(--surface); }
+
+  .auth-wrapper {
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 0 60px rgba(74,108,247,0.1);
+  }
+
+  .auth-tabs {
+    display: flex;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 32px;
+    gap: 4px;
+  }
+
+  .auth-tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .auth-tab.active {
+    background: var(--blue);
+    color: white;
+  }
+
+  .auth-form { display: none; }
+  .auth-form.active { display: block; }
+
+  .form-group { margin-bottom: 16px; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+
+  .form-group input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus { border-color: var(--blue); }
+
+  .btn-google {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 14px;
+  }
+
+  .btn-google:hover { background: var(--blue-dim); border-color: var(--blue); }
+
+  .google-icon {
+    width: 18px; height: 18px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23FFC107' d='M43.6 20.1H42V20H24v8h11.3C33.7 32.8 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.1 6.7 29.3 4 24 4 12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20c0-1.3-.15-2.6-.4-3.9z'/%3E%3Cpath fill='%23FF3D00' d='M6.3 14.7l6.6 4.8C14.7 16 19.1 12 24 12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.1 6.7 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z'/%3E%3Cpath fill='%234CAF50' d='M24 44c5.2 0 9.9-1.9 13.5-5.1l-6.2-5.2C29.3 35.6 26.8 36 24 36c-5.3 0-9.7-3.2-11.3-7.9l-6.5 5C9.6 39.6 16.3 44 24 44z'/%3E%3Cpath fill='%231976D2' d='M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.2 5.2C42 35.5 44 30 44 24c0-1.3-.15-2.6-.4-3.9z'/%3E%3C/svg%3E") center/contain no-repeat;
+    flex-shrink: 0;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 14px 0;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ===== CONTACT ===== */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .contact-info h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .contact-info p { color: var(--muted); line-height: 1.7; margin-bottom: 32px; }
+
+  .contact-btns { display: flex; flex-direction: column; gap: 12px; }
+
+  .btn-contact-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--white);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-contact-action:hover { border-color: var(--blue); background: var(--blue-dim); }
+
+  .contact-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--blue-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .contact-form { display: flex; flex-direction: column; gap: 16px; }
+
+  .contact-form textarea {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.2s;
+  }
+
+  .contact-form textarea:focus { border-color: var(--blue); }
+
+  .contact-form input {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .contact-form input:focus { border-color: var(--blue); }
+
+  /* ===== SERVICE ACCORDION ===== */
+  .service-card { cursor: pointer; }
+
+  .service-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .service-card-header-left { display: flex; align-items: flex-start; gap: 16px; flex: 1; }
+  .service-card-header-left .service-icon { margin-bottom: 0; flex-shrink: 0; }
+
+  .service-card-header-text h3 { margin-bottom: 6px; }
+  .service-card-header-text p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+
+  .service-toggle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--blue-dim);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--blue-light);
+    transition: all 0.3s ease;
+    margin-top: 2px;
+  }
+
+  .service-card.open .service-toggle {
+    transform: rotate(45deg);
+    background: var(--blue);
+    border-color: var(--blue);
+    color: white;
+  }
+
+  .service-card.open { border-color: var(--blue); }
+  .service-card.open::before { opacity: 1; }
+
+  .service-drawer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+    opacity: 0;
+  }
+
+  .service-card.open .service-drawer {
+    max-height: 500px;
+    opacity: 1;
+  }
+
+  .service-drawer-inner {
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .service-drawer-inner p {
+    color: #c0c8e0;
+    font-size: 0.88rem;
+    line-height: 1.75;
+    margin-bottom: 16px;
+  }
+
+  .service-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .service-tag {
+    background: var(--blue-dim);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    color: var(--blue-light);
+    font-weight: 500;
+  }
+
+  .service-steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .service-steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #c0c8e0;
+  }
+
+  .step-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .service-drawer-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    background: var(--blue-dim);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--blue-light);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .service-drawer-cta:hover { background: var(--blue); color: white; border-color: var(--blue); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 48px 6% 32px;
+  }
+
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+
+  .footer-brand p {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-top: 10px;
+    max-width: 240px;
+    line-height: 1.6;
+  }
+
+  .footer-links h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .footer-links a {
+    color: #8a94b0;
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--white); }
+
+  .social-links { display: flex; gap: 12px; }
+
+  .social-btn {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .social-btn:hover { background: var(--blue-dim); border-color: var(--blue); }
+
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-bottom p { color: var(--muted); font-size: 0.82rem; }
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ===== MOBILE NAV ===== */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 70px; left: 0; right: 0;
+    background: rgba(6,8,16,0.97);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 6%;
+    z-index: 99;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { color: var(--muted); text-decoration: none; font-size: 1rem; font-weight: 500; padding: 8px 0; }
+  .mobile-menu a:hover { color: var(--white); }
+
+  @media (max-width: 768px) {
+    .nav-links, .btn-nav-login { display: none; }
+    .hamburger { display: flex; }
+    .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+    .hero h1 { font-size: 2.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE LOADER -->
+<div id="page-loader">
+  <div class="loader-logo">ONYXO DEVS</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- SCROLL PROGRESS -->
+<div id="scroll-progress"></div>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="logo-text">ONYXO DEVS</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#auth" class="btn-nav-login" id="btn-nav-login">Login</a>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="toggleMenu()">Services</a>
+  <a href="#pricing" onclick="toggleMenu()">Pricing</a>
+  <a href="#contact" onclick="toggleMenu()">Contact</a>
+  <a href="#auth" onclick="toggleMenu()">Login / Sign Up</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <canvas id="particleCanvas"></canvas>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Available for new projects
+    </div>
+    <h1>We Build Your<br><span id="typing-text"></span><span class="typing-cursor"></span></h1>
+    <p>Websites. Apps. Solutions. Built by passionate developers for your growing business — at prices that make sense.</p>
+    <div class="hero-btns">
+      <a href="#pricing" class="btn-primary" id="cta-getstarted">Get Started</a>
+      <a href="#services" class="btn-secondary" id="cta-portfolio">Our Services</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item reveal">
+    <span class="stat-number" data-target="50">0<span>+</span></span>
+    <p class="stat-label">Projects Delivered</p>
+  </div>
+  <div class="stat-item reveal stagger-2">
+    <span class="stat-number" data-target="100">0<span>%</span></span>
+    <p class="stat-label">Client Satisfaction</p>
+  </div>
+  <div class="stat-item reveal stagger-3">
+    <span class="stat-number" data-target="5">0<span> days</span></span>
+    <p class="stat-label">Fastest Delivery</p>
+  </div>
+  <div class="stat-item reveal stagger-4">
+    <span class="stat-number" data-target="24">0<span>/7</span></span>
+    <p class="stat-label">Support Available</p>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-header reveal">
+    <p class="section-label">What We Do</p>
+    <h2 class="section-title">Services We Offer</h2>
+    <p class="section-sub">From a simple landing page to a full mobile app — we handle it all with care and quality.</p>
+  </div>
+  <div class="services-grid">
+
+    <div class="service-card reveal stagger-1" onclick="toggleService(this)">
+      <div class="service-card-header">
+        <div class="service-card-header-left">
+          <div class="service-icon">🌐</div>
+          <div class="service-card-header-text">
+            <h3>Website Development</h3>
+            <p>Fast, modern, mobile-responsive websites for your business.</p>
+          </div>
+        </div>
+        <div class="service-toggle">＋</div>
+      </div>
+      <div class="service-drawer">
+        <div class="service-drawer-inner">
+          <p>We build complete websites from scratch — landing pages, business sites, portfolios, and e-commerce stores. Every site is optimized for speed, SEO, and works perfectly on all screen sizes including mobile phones.</p>
+          <div class="service-tags">
+            <span class="service-tag">HTML / CSS / JS</span>
+            <span class="service-tag">React</span>
+            <span class="service-tag">WordPress</span>
+            <span class="service-tag">Mobile Responsive</span>
+            <span class="service-tag">SEO Ready</span>
+          </div>
+          <ul class="service-steps">
+            <li><span class="step-num">1</span> You share your business details and preferences</li>
+            <li><span class="step-num">2</span> We design a mockup for your approval</li>
+            <li><span class="step-num">3</span> Full website built and tested in 5–10 days</li>
+            <li><span class="step-num">4</span> Deployed live with your domain and hosting</li>
+          </ul>
+          <a href="#pricing" class="service-drawer-cta">See Pricing →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card reveal stagger-2" onclick="toggleService(this)">
+      <div class="service-card-header">
+        <div class="service-card-header-left">
+          <div class="service-icon">📱</div>
+          <div class="service-card-header-text">
+            <h3>Mobile App Development</h3>
+            <p>Custom Android apps connected to real-time backends.</p>
+          </div>
+        </div>
+        <div class="service-toggle">＋</div>
+      </div>
+      <div class="service-drawer">
+        <div class="service-drawer-inner">
+          <p>We develop Android applications tailored to your business needs — whether it's a booking app, customer portal, delivery tracker, or any custom tool. Apps are connected to Firebase for real-time data, authentication, and cloud storage.</p>
+          <div class="service-tags">
+            <span class="service-tag">Flutter</span>
+            <span class="service-tag">Android</span>
+            <span class="service-tag">Firebase</span>
+            <span class="service-tag">Push Notifications</span>
+            <span class="service-tag">Admin Panel</span>
+          </div>
+          <ul class="service-steps">
+            <li><span class="step-num">1</span> Define app features and user flow with you</li>
+            <li><span class="step-num">2</span> UI/UX design screens shared for review</li>
+            <li><span class="step-num">3</span> Development, testing, and bug fixing</li>
+            <li><span class="step-num">4</span> APK delivered and published on Play Store</li>
+          </ul>
+          <a href="#pricing" class="service-drawer-cta">See Pricing →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card reveal stagger-3" onclick="toggleService(this)">
+      <div class="service-card-header">
+        <div class="service-card-header-left">
+          <div class="service-icon">🎨</div>
+          <div class="service-card-header-text">
+            <h3>UI/UX Design</h3>
+            <p>Clean, intuitive interfaces your users will love.</p>
+          </div>
+        </div>
+        <div class="service-toggle">＋</div>
+      </div>
+      <div class="service-drawer">
+        <div class="service-drawer-inner">
+          <p>Great products need great design. We craft user interfaces that are visually stunning, easy to navigate, and built around how your customers actually think and behave. From wireframes to final pixel-perfect screens.</p>
+          <div class="service-tags">
+            <span class="service-tag">Figma</span>
+            <span class="service-tag">Wireframing</span>
+            <span class="service-tag">Prototyping</span>
+            <span class="service-tag">Brand Identity</span>
+            <span class="service-tag">Color Systems</span>
+          </div>
+          <ul class="service-steps">
+            <li><span class="step-num">1</span> Understand your brand, audience, and goals</li>
+            <li><span class="step-num">2</span> Wireframes and low-fidelity mockups</li>
+            <li><span class="step-num">3</span> High-fidelity Figma designs with your feedback</li>
+            <li><span class="step-num">4</span> Final assets handed over for development</li>
+          </ul>
+          <a href="#contact" class="service-drawer-cta">Get a Quote →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card reveal stagger-4" onclick="toggleService(this)">
+      <div class="service-card-header">
+        <div class="service-card-header-left">
+          <div class="service-icon">🔍</div>
+          <div class="service-card-header-text">
+            <h3>SEO Optimization</h3>
+            <p>Get your business ranking on Google searches.</p>
+          </div>
+        </div>
+        <div class="service-toggle">＋</div>
+      </div>
+      <div class="service-drawer">
+        <div class="service-drawer-inner">
+          <p>When someone searches for your type of business on Google, your website should show up. We optimize your site's structure, content, speed, and technical elements so Google ranks you higher and real customers find you.</p>
+          <div class="service-tags">
+            <span class="service-tag">On-Page SEO</span>
+            <span class="service-tag">Google Search Console</span>
+            <span class="service-tag">Meta Tags</span>
+            <span class="service-tag">Site Speed</span>
+            <span class="service-tag">Local SEO</span>
+          </div>
+          <ul class="service-steps">
+            <li><span class="step-num">1</span> Full audit of your current website</li>
+            <li><span class="step-num">2</span> Keyword research for your niche</li>
+            <li><span class="step-num">3</span> On-page and technical SEO fixes applied</li>
+            <li><span class="step-num">4</span> Google Search Console setup and monitoring</li>
+          </ul>
+          <a href="#contact" class="service-drawer-cta">Get a Quote →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card reveal stagger-5" onclick="toggleService(this)">
+      <div class="service-card-header">
+        <div class="service-card-header-left">
+          <div class="service-icon">🔥</div>
+          <div class="service-card-header-text">
+            <h3>Firebase Backend Setup</h3>
+            <p>Scalable real-time backends for your apps and websites.</p>
+          </div>
+        </div>
+        <div class="service-toggle">＋</div>
+      </div>
+      <div class="service-drawer">
+        <div class="service-drawer-inner">
+          <p>Firebase is Google's powerful backend platform — we set it up and configure it for your project. This includes real-time databases, user login systems, file storage, push notifications, and cloud functions that run server-side logic without a server.</p>
+          <div class="service-tags">
+            <span class="service-tag">Firestore Database</span>
+            <span class="service-tag">Authentication</span>
+            <span class="service-tag">Cloud Storage</span>
+            <span class="service-tag">Cloud Functions</span>
+            <span class="service-tag">Realtime DB</span>
+          </div>
+          <ul class="service-steps">
+            <li><span class="step-num">1</span> Project setup and Firebase console configuration</li>
+            <li><span class="step-num">2</span> Database schema design and security rules</li>
+            <li><span class="step-num">3</span> Auth flows: email, Google, phone OTP</li>
+            <li><span class="step-num">4</span> Integration with your app or website</li>
+          </ul>
+          <a href="#pricing" class="service-drawer-cta">See Pricing →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card reveal stagger-6" onclick="toggleService(this)">
+      <div class="service-card-header">
+        <div class="service-card-header-left">
+          <div class="service-icon">🛟</div>
+          <div class="service-card-header-text">
+            <h3>24/7 Technical Support</h3>
+            <p>We stay with you long after your project is delivered.</p>
+          </div>
+        </div>
+        <div class="service-toggle">＋</div>
+      </div>
+      <div class="service-drawer">
+        <div class="service-drawer-inner">
+          <p>Technology breaks sometimes — and when it does, you need someone who picks up fast. Premium clients get direct WhatsApp access to our team any time of day or night. We also do monthly check-ins to make sure everything is running smoothly and suggest improvements.</p>
+          <div class="service-tags">
+            <span class="service-tag">WhatsApp Support</span>
+            <span class="service-tag">Bug Fixes</span>
+            <span class="service-tag">Monthly Reports</span>
+            <span class="service-tag">Updates</span>
+            <span class="service-tag">Lifetime Maintenance</span>
+          </div>
+          <ul class="service-steps">
+            <li><span class="step-num">1</span> Dedicated WhatsApp support number shared</li>
+            <li><span class="step-num">2</span> Bug reports resolved within 24 hours</li>
+            <li><span class="step-num">3</span> Monthly performance and traffic report</li>
+            <li><span class="step-num">4</span> Free minor updates included every month</li>
+          </ul>
+          <a href="#pricing" class="service-drawer-cta">Get Premium →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="background: var(--surface);">
+  <div class="section-header reveal">
+    <p class="section-label">Transparent Pricing</p>
+    <h2 class="section-title">Choose Your Plan</h2>
+    <p class="section-sub">No hidden fees. No surprises. Just honest work at fair prices.</p>
+  </div>
+  <div class="pricing-grid">
+
+    <!-- BASIC -->
+    <div class="pricing-card reveal">
+      <p class="plan-name">Basic</p>
+      <div class="plan-price"><span>₹</span>2,999</div>
+      <p class="plan-desc">Perfect for getting your business online fast.</p>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Static website up to 5 pages</li>
+        <li><span class="check">✓</span> Fully mobile responsive</li>
+        <li><span class="check">✓</span> Contact form integrated</li>
+        <li><span class="check">✓</span> Google Maps embed</li>
+        <li><span class="check">✓</span> WhatsApp chat button</li>
+        <li><span class="check">✓</span> Delivered in 5 days</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline" id="btn-basic">Get Basic</button>
+    </div>
+
+    <!-- PRO -->
+    <div class="pricing-card popular reveal">
+      <div class="popular-badge">⚡ Most Popular</div>
+      <p class="plan-name">Pro</p>
+      <div class="plan-price"><span>₹</span>5,999</div>
+      <p class="plan-desc">For businesses that want more power and visibility.</p>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Everything in Basic</li>
+        <li><span class="check">✓</span> Dynamic website with admin panel</li>
+        <li><span class="check">✓</span> SEO optimization</li>
+        <li><span class="check">✓</span> Google Analytics setup</li>
+        <li><span class="check">✓</span> Social media integration</li>
+        <li><span class="check">✓</span> Custom domain setup</li>
+        <li><span class="check">✓</span> Delivered in 10 days</li>
+      </ul>
+      <button class="btn-plan btn-plan-filled" id="btn-pro">Get Pro</button>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="pricing-card reveal">
+      <p class="plan-name">Premium</p>
+      <div class="plan-price"><span>₹</span>12,999</div>
+      <p class="plan-desc">The full package — website, app, and lifetime support.</p>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Everything in Pro</li>
+        <li><span class="check">✓</span> Custom Android application</li>
+        <li><span class="check">✓</span> Firebase backend — lifetime free</li>
+        <li><span class="check">✓</span> 24/7 WhatsApp support</li>
+        <li><span class="check">✓</span> 1 year free hosting</li>
+        <li><span class="check">✓</span> Monthly performance report</li>
+        <li><span class="check">✓</span> Delivered in 21 days</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline" id="btn-premium">Get Premium</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- AUTH -->
+<section id="auth">
+  <div class="section-header reveal" style="text-align:center; max-width:480px; margin: 0 auto 40px;">
+    <p class="section-label">Client Portal</p>
+    <h2 class="section-title">Get Started</h2>
+    <p class="section-sub">Create an account or sign in to track your project and communicate with our team.</p>
+  </div>
+  <div class="auth-wrapper reveal">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-form active" id="form-login">
+      <button class="btn-google" id="btn-google-login">
+        <span class="google-icon"></span>
+        Sign in with Google
+      </button>
+      <div class="divider">or continue with email</div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••">
+      </div>
+      <button class="btn-plan btn-plan-filled" id="btn-login" style="margin-top:8px;">Login</button>
+    </div>
+
+    <!-- SIGNUP -->
+    <div class="auth-form" id="form-signup">
+      <button class="btn-google" id="btn-google-signup">
+        <span class="google-icon"></span>
+        Sign up with Google
+      </button>
+      <div class="divider">or continue with email</div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" placeholder="Create a password">
+      </div>
+      <button class="btn-plan btn-plan-filled" id="btn-signup" style="margin-top:8px;">Create Account</button>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="background: var(--surface);">
+  <div class="contact-grid">
+    <div class="contact-info reveal">
+      <p class="section-label">Get In Touch</p>
+      <h2 class="section-title">Let's Build Something Together</h2>
+      <p>Have a project in mind? Tell us about it. We'll get back to you within 24 hours and give you a free consultation.</p>
+      <div class="contact-btns">
+        <a href="#" class="btn-contact-action" id="btn-whatsapp">
+          <span class="contact-icon">💬</span>
+          Chat on WhatsApp
+        </a>
+        <a href="#" class="btn-contact-action" id="btn-email">
+          <span class="contact-icon">✉️</span>
+          Send us an Email
+        </a>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="contact-form">
+        <input type="text" placeholder="Your Name">
+        <input type="email" placeholder="Email Address">
+        <input type="tel" placeholder="Phone Number">
+        <textarea placeholder="Tell us about your project..."></textarea>
+        <button class="btn-plan btn-plan-filled" id="btn-contact">Send Message</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <span class="logo-text" style="font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800;">ONYXO DEVS</span>
+      <p>Turning Ideas Into Digital Reality. Built by passionate developers.</p>
+      <div class="social-links" style="margin-top:16px;">
+        <a href="#" class="social-btn" id="link-instagram">📸</a>
+        <a href="#" class="social-btn" id="link-linkedin">💼</a>
+        <a href="#" class="social-btn" id="link-github">🐙</a>
+      </div>
+    </div>
+    <div class="footer-links">
+      <h4>Navigate</h4>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h4>Plans</h4>
+      <ul>
+        <li><a href="#pricing">Basic — ₹2,999</a></li>
+        <li><a href="#pricing">Pro — ₹5,999</a></li>
+        <li><a href="#pricing">Premium — ₹12,999</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Onyxo Devs. All rights reserved.</p>
+    <p style="color: var(--blue-light); font-size:0.8rem;">Built with 💙 by Onyxo Devs</p>
+  </div>
+</footer>
+
+<script>
+  // ===== SERVICE ACCORDION =====
+  function toggleService(card) {
+    const isOpen = card.classList.contains('open');
+    // Close all open cards
+    document.querySelectorAll('.service-card.open').forEach(c => c.classList.remove('open'));
+    // If it wasn't open, open it
+    if (!isOpen) card.classList.add('open');
+  }
+
+  // ===== CUSTOM CURSOR =====
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let cx = 0, cy = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; });
+  function animateCursor() {
+    cursor.style.left = cx + 'px';
+    cursor.style.top  = cy + 'px';
+    rx += (cx - rx) * 0.12;
+    ry += (cy - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // ===== SCROLL PROGRESS =====
+  const bar = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    bar.style.width = pct + '%';
+  });
+
+  // ===== MOBILE MENU =====
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // ===== AUTH TABS =====
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+    document.getElementById('form-' + tab).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // ===== SCROLL REVEAL =====
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ===== NAVBAR SCROLL =====
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.borderBottomColor = window.scrollY > 50
+      ? 'rgba(74,108,247,0.35)' : 'rgba(74,108,247,0.2)';
+  });
+
+  // ===== TYPING ANIMATION =====
+  const phrases = ['Digital Presence', 'Mobile Apps', 'Your Brand', 'Your Future'];
+  let pi = 0, ci = 0, deleting = false;
+  const el = document.getElementById('typing-text');
+  function type() {
+    const word = phrases[pi];
+    el.textContent = deleting ? word.slice(0, ci--) : word.slice(0, ci++);
+    el.style.background = 'linear-gradient(135deg, #6d8ffb, #a78bfa)';
+    el.style.webkitBackgroundClip = 'text';
+    el.style.webkitTextFillColor = 'transparent';
+    el.style.backgroundClip = 'text';
+    if (!deleting && ci > word.length) { deleting = true; setTimeout(type, 1400); return; }
+    if (deleting && ci < 0) { deleting = false; pi = (pi + 1) % phrases.length; ci = 0; setTimeout(type, 300); return; }
+    setTimeout(type, deleting ? 55 : 90);
+  }
+  setTimeout(type, 1600);
+
+  // ===== PARTICLE CANVAS =====
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  function resizeCanvas() {
+    canvas.width  = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.r = Math.random() * 1.5 + 0.3;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.a = Math.random() * 0.5 + 0.1;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(74,108,247,${this.a})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+  function drawLines() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 100) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(74,108,247,${0.08 * (1 - dist/100)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    drawLines();
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  // ===== COUNTER ANIMATION =====
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target);
+    const suffix = el.querySelector('span') ? el.querySelector('span').textContent : '';
+    const inner  = el.querySelector('span');
+    let current = 0;
+    const step = Math.ceil(target / 40);
+    const interval = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.childNodes[0].textContent = current;
+      if (inner) el.appendChild(inner);
+      if (current >= target) clearInterval(interval);
+    }, 30);
+  }
+
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const num = e.target.querySelector('.stat-number');
+        if (num && !num.dataset.counted) {
+          num.dataset.counted = true;
+          animateCounter(num);
+        }
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.stat-item').forEach(el => counterObserver.observe(el));
+
+  // ===== 3D TILT ON CARDS =====
+  document.querySelectorAll('.service-card, .pricing-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width  - 0.5;
+      const y = (e.clientY - rect.top)  / rect.height - 0.5;
+      card.style.transform = `perspective(600px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+      card.style.transition = 'transform 0.5s ease';
+    });
+    card.addEventListener('mouseenter', () => {
+      card.style.transition = 'transform 0.1s ease';
+    });
+  });
+
+  // ===== MAGNETIC BUTTONS =====
+  document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const rect = btn.getBoundingClientRect();
+      const x = (e.clientX - rect.left - rect.width  / 2) * 0.25;
+      const y = (e.clientY - rect.top  - rect.height / 2) * 0.25;
+      btn.style.transform = `translate(${x}px, ${y}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+      btn.style.transition = 'transform 0.4s ease, background 0.2s, box-shadow 0.2s';
+    });
+  });
+
+  // ===== RIPPLE ON BUTTONS =====
+  document.querySelectorAll('.btn-plan, .btn-primary').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      ripple.style.cssText = `
+        position:absolute; border-radius:50%; background:rgba(255,255,255,0.25);
+        width:0; height:0; left:${e.clientX - rect.left}px; top:${e.clientY - rect.top}px;
+        transform:translate(-50%,-50%);
+        animation: rippleAnim 0.6s ease forwards;
+        pointer-events:none;
+      `;
+      this.style.position = 'relative';
+      this.style.overflow = 'hidden';
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+
+  // Inject ripple keyframe
+  const style = document.createElement('style');
+  style.textContent = `@keyframes rippleAnim { to { width: 300px; height: 300px; opacity: 0; } }`;
+  document.head.appendChild(style);
+
+</script>
+
+<!-- ============================================================
+  🔥 FIREBASE + API INTEGRATION LAYER
+  
+  HOW TO USE:
+  1. Go to https://console.firebase.google.com
+  2. Create a project → Add Web App → Copy your config
+  3. Paste your config values in FIREBASE_CONFIG below
+  4. Uncomment the Firebase SDK script tags
+  5. Done — all auth, database, and contact form functions
+     below will work automatically.
+============================================================ -->
+
+<!-- STEP 1: Uncomment these 3 lines when ready to connect Firebase -->
+<!--
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+-->
+
+<script>
+// ============================================================
+// 🔧 STEP 2: PASTE YOUR FIREBASE CONFIG HERE
+// ============================================================
+const FIREBASE_CONFIG = {
+  apiKey:            "PASTE_YOUR_API_KEY_HERE",
+  authDomain:        "PASTE_YOUR_AUTH_DOMAIN_HERE",
+  projectId:         "PASTE_YOUR_PROJECT_ID_HERE",
+  storageBucket:     "PASTE_YOUR_STORAGE_BUCKET_HERE",
+  messagingSenderId: "PASTE_YOUR_SENDER_ID_HERE",
+  appId:             "PASTE_YOUR_APP_ID_HERE"
+};
+
+// ============================================================
+// 🔧 STEP 3: PASTE YOUR OTHER API KEYS HERE (optional)
+// ============================================================
+const API_KEYS = {
+  whatsappNumber: "91XXXXXXXXXX",       // Your WhatsApp number with country code
+  emailJsServiceId:  "YOUR_EMAILJS_SERVICE_ID",  // From emailjs.com (free contact form emails)
+  emailJsTemplateId: "YOUR_EMAILJS_TEMPLATE_ID",
+  emailJsPublicKey:  "YOUR_EMAILJS_PUBLIC_KEY",
+  googleMapsKey:     "YOUR_GOOGLE_MAPS_KEY",      // For embedding maps
+  razorpayKeyId:     "YOUR_RAZORPAY_KEY_ID"       // For payments (optional)
+};
+
+// ============================================================
+// 🔥 FIREBASE INIT — runs only if SDK is loaded
+// ============================================================
+let db = null, auth = null;
+
+function initFirebase() {
+  if (typeof firebase === 'undefined') {
+    console.warn("Firebase SDK not loaded yet. Uncomment the script tags above.");
+    return;
+  }
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db   = firebase.firestore();
+  auth = firebase.auth();
+  console.log("✅ Firebase connected!");
+
+  // Listen for auth state changes — updates UI automatically
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      console.log("👤 Logged in:", user.displayName || user.email);
+      document.getElementById('btn-nav-login').textContent = user.displayName || "Account";
+    } else {
+      document.getElementById('btn-nav-login').textContent = "Login";
+    }
+  });
+}
+initFirebase();
+
+// ============================================================
+// 🔐 AUTH FUNCTIONS — connect to Login/Signup buttons
+// ============================================================
+
+// Google Login — wire to id="btn-google-login" and id="btn-google-signup"
+async function loginWithGoogle() {
+  if (!auth) return alert("Firebase not connected yet.");
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try {
+    const result = await auth.signInWithPopup(provider);
+    console.log("✅ Google login success:", result.user.displayName);
+    alert("Welcome, " + result.user.displayName + "!");
+  } catch (err) {
+    console.error("Google login failed:", err.message);
+  }
+}
+
+// Email + Password Login
+async function loginWithEmail(email, password) {
+  if (!auth) return alert("Firebase not connected yet.");
+  try {
+    const result = await auth.signInWithEmailAndPassword(email, password);
+    console.log("✅ Email login success:", result.user.email);
+    alert("Welcome back!");
+  } catch (err) {
+    alert("Login failed: " + err.message);
+  }
+}
+
+// Email + Password Signup
+async function signupWithEmail(name, email, password) {
+  if (!auth) return alert("Firebase not connected yet.");
+  try {
+    const result = await auth.createUserWithEmailAndPassword(email, password);
+    await result.user.updateProfile({ displayName: name });
+    // Save user to Firestore
+    await saveToFirestore("users", result.user.uid, {
+      name, email,
+      createdAt: new Date().toISOString(),
+      plan: "none"
+    });
+    console.log("✅ Signup success:", email);
+    alert("Account created! Welcome to Onyxo Devs.");
+  } catch (err) {
+    alert("Signup failed: " + err.message);
+  }
+}
+
+// Logout
+async function logout() {
+  if (!auth) return;
+  await auth.signOut();
+  alert("Logged out.");
+}
+
+// ============================================================
+// 🗃️ FIRESTORE HELPERS — read/write data easily
+// ============================================================
+
+// Save any data to Firestore
+// Usage: saveToFirestore("contacts", "auto", { name, email, message })
+async function saveToFirestore(collection, docId, data) {
+  if (!db) { console.warn("Firestore not ready."); return; }
+  try {
+    if (docId === "auto") {
+      await db.collection(collection).add(data);
+    } else {
+      await db.collection(collection).doc(docId).set(data);
+    }
+    console.log("✅ Saved to Firestore:", collection);
+  } catch (err) {
+    console.error("Firestore write failed:", err.message);
+  }
+}
+
+// Read data from Firestore
+// Usage: const docs = await getFromFirestore("contacts")
+async function getFromFirestore(collection) {
+  if (!db) { console.warn("Firestore not ready."); return []; }
+  try {
+    const snapshot = await db.collection(collection).get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (err) {
+    console.error("Firestore read failed:", err.message);
+    return [];
+  }
+}
+
+// ============================================================
+// 📬 CONTACT FORM SUBMISSION
+// Saves to Firestore + sends email via EmailJS
+// ============================================================
+async function submitContactForm(name, email, phone, message) {
+  // 1. Save to Firestore
+  await saveToFirestore("contacts", "auto", {
+    name, email, phone, message,
+    submittedAt: new Date().toISOString()
+  });
+
+  // 2. Send email via EmailJS (optional — sign up at emailjs.com for free)
+  if (typeof emailjs !== 'undefined') {
+    emailjs.send(
+      API_KEYS.emailJsServiceId,
+      API_KEYS.emailJsTemplateId,
+      { from_name: name, from_email: email, phone, message },
+      API_KEYS.emailJsPublicKey
+    ).then(() => console.log("✅ Email sent via EmailJS"));
+  }
+
+  alert("Message sent! We'll get back to you within 24 hours.");
+}
+
+// ============================================================
+// 🌐 EXTERNAL API CALL HELPER
+// Use this to call any third-party API (REST)
+// ============================================================
+
+// Usage: const data = await callAPI("https://api.example.com/endpoint", "GET")
+// Usage: const data = await callAPI("https://api.example.com/endpoint", "POST", { key: "value" })
+async function callAPI(url, method = "GET", body = null, headers = {}) {
+  try {
+    const options = {
+      method,
+      headers: { "Content-Type": "application/json", ...headers }
+    };
+    if (body && method !== "GET") options.body = JSON.stringify(body);
+    const res  = await fetch(url, options);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("API call failed:", err.message);
+    return null;
+  }
+}
+
+// ============================================================
+// 📌 WIRE UP BUTTONS — connect HTML buttons to functions above
+// Uncomment each line once Firebase is connected
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- Google login/signup buttons ---
+  // document.getElementById('btn-google-login').addEventListener('click', loginWithGoogle);
+  // document.getElementById('btn-google-signup').addEventListener('click', loginWithGoogle);
+
+  // --- Email login button ---
+  // document.getElementById('btn-login').addEventListener('click', () => {
+  //   const email    = document.querySelector('#form-login input[type="email"]').value;
+  //   const password = document.querySelector('#form-login input[type="password"]').value;
+  //   loginWithEmail(email, password);
+  // });
+
+  // --- Email signup button ---
+  // document.getElementById('btn-signup').addEventListener('click', () => {
+  //   const name     = document.querySelector('#form-signup input[type="text"]').value;
+  //   const email    = document.querySelector('#form-signup input[type="email"]').value;
+  //   const password = document.querySelector('#form-signup input[type="password"]').value;
+  //   signupWithEmail(name, email, password);
+  // });
+
+  // --- Contact form button ---
+  // document.getElementById('btn-contact').addEventListener('click', () => {
+  //   const inputs = document.querySelectorAll('.contact-form input');
+  //   const msg    = document.querySelector('.contact-form textarea').value;
+  //   submitContactForm(inputs[0].value, inputs[1].value, inputs[2].value, msg);
+  // });
+
+  // --- WhatsApp button ---
+  // document.getElementById('btn-whatsapp').href = `https://wa.me/${API_KEYS.whatsappNumber}`;
+  // document.getElementById('btn-email').href = `mailto:your@email.com`;
+
+  // --- Social links ---
+  // document.getElementById('link-instagram').href = "https://instagram.com/YOUR_HANDLE";
+  // document.getElementById('link-linkedin').href  = "https://linkedin.com/in/YOUR_HANDLE";
+  // document.getElementById('link-github').href    = "https://github.com/YOUR_HANDLE";
+
+  // --- Pricing buttons (open WhatsApp with plan name) ---
+  // document.getElementById('btn-basic').addEventListener('click', () => {
+  //   window.open(`https://wa.me/${API_KEYS.whatsappNumber}?text=Hi, I'm interested in the Basic plan (₹2,999)`, '_blank');
+  // });
+  // document.getElementById('btn-pro').addEventListener('click', () => {
+  //   window.open(`https://wa.me/${API_KEYS.whatsappNumber}?text=Hi, I'm interested in the Pro plan (₹5,999)`, '_blank');
+  // });
+  // document.getElementById('btn-premium').addEventListener('click', () => {
+  //   window.open(`https://wa.me/${API_KEYS.whatsappNumber}?text=Hi, I'm interested in the Premium plan (₹12,999)`, '_blank');
+  // });
+
+});
+</script>
+
+</body>
+</html>
